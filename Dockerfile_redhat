@@ -1,0 +1,105 @@
+FROM centos:6.9
+
+RUN yum update -y
+
+RUN yum install git cmake make ctags -y
+RUN yum install gcc-c++ boost-devel java-1.8.0-openjdk-devel -y
+RUN yum install openssl -y
+RUN yum install graphviz file-devel -y
+#RUN yum install gtest -y
+
+RUN curl -sL https://rpm.nodesource.com/setup_8.x | bash -
+RUN yum install nodejs -y
+
+#RUN yum install libgit2-dev
+
+RUN yum install wget -y
+
+RUN wget http://xenia.sote.hu/ftp/mirrors/www.apache.org/thrift/0.10.0/thrift-0.10.0.tar.gz
+RUN yum install byacc flex -y
+RUN tar -xvf ./thrift-0.10.0.tar.gz
+WORKDIR /thrift-0.10.0
+RUN ./configure --with-python=NO --with-php=NO
+RUN make install
+WORKDIR /
+
+RUN yum install unzip -y
+
+#RUN yum install libtinfo-dev
+
+RUN wget https://github.com/llvm-mirror/llvm/archive/d79c539c3b03f5e05ff3a528a8e4d9bfce121d69.zip -O llvm.zip
+RUN unzip llvm.zip
+RUN rm llvm.zip
+RUN mv llvm-* llvm
+WORKDIR /llvm/tools
+RUN wget https://github.com/llvm-mirror/clang/archive/e2fbe37780ca1bad55fbdb18a8c448d7156a932d.zip -O clang.zip
+RUN unzip clang.zip
+RUN rm clang.zip
+RUN mv clang-* clang
+WORKDIR /
+
+RUN wget https://cmake.org/files/v3.12/cmake-3.12.0-Linux-x86_64.tar.gz
+RUN tar -zxvf cmake-3.12.0-Linux-x86_64.tar.gz -C /usr/local --strip 1
+
+RUN wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+RUN yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++ -y
+RUN scl enable devtoolset-2 bash
+RUN gcc --version
+
+WORKDIR /
+RUN yum install centos-release-scl -y
+RUN yum install python27 -y
+
+RUN mkdir build_llvm
+WORKDIR /build_llvm
+RUN export REQUIRES_RTTI=1
+RUN source /opt/rh/python27/enable && \
+  source /opt/rh/devtoolset-2/enable && \
+  cmake -G "Unix Makefiles" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_ENABLE_RTTI=ON \
+  ../llvm
+RUN source /opt/rh/python27/enable && \
+  source /opt/rh/devtoolset-2/enable && \
+  make install -j4
+
+RUN wget http://www.codesynthesis.com/download/odb/2.4/libodb-2.4.0.tar.gz
+RUN tar -xvf libodb-2.4.0.tar.gz
+WORKDIR libodb-2.4.0
+RUN ./configure
+RUN make install
+WORKDIR /
+
+#RUN yum install sqlite -y
+#RUN wget http://www.codesynthesis.com/download/odb/2.4/libodb-sqlite-2.4.0.tar.gz
+#RUN tar -xvf libodb-sqlite-2.4.0.tar.gz
+#WORKDIR libodb-sqlite-2.4.0
+#RUN ./configure \
+#  --with-libodb="$(readlink -f ../libodb-2.4.0)"
+#RUN make install
+#WORKDIR ..
+
+RUN yum install postgresql-devel -y
+RUN wget http://www.codesynthesis.com/download/odb/2.4/libodb-pgsql-2.4.0.tar.gz
+RUN tar -xvf libodb-pgsql-2.4.0.tar.gz
+WORKDIR libodb-pgsql-2.4.0
+RUN ./configure \
+  --with-libodb="$(readlink -f ../libodb-2.4.0)"
+RUN make install
+WORKDIR /
+
+# libcutl missing!!!
+RUN yum install devtoolset-2-gcc-plugin-devel expat-devel -y
+RUN wget http://www.codesynthesis.com/download/odb/2.4/odb-2.4.0.tar.gz
+RUN tar -xvf odb-2.4.0.tar.gz
+WORKDIR odb-2.4.0
+RUN source /opt/rh/devtoolset-2/enable && ./configure
+RUN source /opt/rh/devtoolset-2/enable && make install
+WORKDIR /
+
+RUN mkdir gtest
+RUN cp -R /usr/src/gtest/* gtest
+RUN cmake .
+RUN make
+RUN mkdir gtest/lib
+RUN mv libgtest.a libgtest_main.a gtest/lib/
