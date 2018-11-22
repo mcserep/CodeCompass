@@ -139,15 +139,10 @@ public:
         << "Response:\n" << response.c_str() << std::endl;
 
       // Send HTTP reply to the client create headers
-      mg613_send_header(conn_, "Content-Type", "application/x-thrift");
-      mg613_send_header(
-        conn_, "Content-Length", std::to_string(response.length()).c_str());
-
-      // Terminate headers
-      mg613_write(conn_, "\r\n", 2);
+      mg613_send_head(conn_, 200, response.length(), "Content-Type: application/x-thrift");
 
       // Send content
-      mg613_write(conn_, response.c_str(), response.length());
+      mg613_printf(conn_, "%.*s", response.length(), response.c_str());
     }
     catch (const std::exception& ex)
     {
