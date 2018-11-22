@@ -8,7 +8,7 @@
 #include <boost/program_options.hpp>
 
 #include "pluginhandler.h"
-#include "mongoose.h"
+#include "mongoose_613.h"
 
 namespace cc 
 { 
@@ -19,7 +19,7 @@ class RequestHandler
 {
 public:
   virtual std::string key() const = 0;
-  virtual int beginRequest(struct mg_connection*) = 0;
+  virtual int beginRequest(struct mg613_connection*) = 0;
   virtual ~RequestHandler() {}
 };
 

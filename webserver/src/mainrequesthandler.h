@@ -16,10 +16,10 @@ public:
   std::string digestPasswdFile;
   std::map<std::string, std::string> dataDir;
 
-  int operator()(struct mg_connection* conn_, enum mg_event ev_);
+  int operator()(struct mg613_connection* conn_, enum mg613_event ev_);
 
 private:
-  int begin_request_handler(struct mg_connection *conn_);
+  int begin_request_handler(struct mg613_connection *conn_);
   std::string getDocDirByURI(std::string uri_);
 };
   

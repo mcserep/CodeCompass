@@ -9,7 +9,7 @@
 #include <vector>
 #include <signal.h>
 
-#include <webserver/mongoose.h>
+#include <webserver/mongoose_613.h>
 
 namespace cc
 {
@@ -32,7 +32,7 @@ private:
 class ThreadedMongoose
 {
 public:
-  typedef std::function<int (mg_connection *, mg_event)> Handler;
+  typedef std::function<int (mg613_connection *, mg613_event)> Handler;
 
   /**
    * Constructor for creating a multithreaded Mongoose server.
@@ -61,7 +61,7 @@ public:
   template <typename T>
   void run(T* serverData_, Handler handler_)
   {
-    typedef std::shared_ptr<mg_server> ServerPtr;
+    typedef std::shared_ptr<mg613_server> ServerPtr;
 
     handler = handler_;
 
@@ -85,10 +85,10 @@ public:
     for (int i = 0; i < _numThreads; ++i)
     {
       ServerPtr server = ServerPtr(
-        mg_create_server((void*)serverData_, delegater),
-        [](mg_server* s)
+        mg613_create_server((void*)serverData_, delegater),
+        [](mg613_server* s)
         {
-          mg_destroy_server(&s);
+          mg613_destroy_server(&s);
         });
 
       for (const auto& opt : _options)
@@ -96,13 +96,13 @@ public:
         // if we create more servers, we have to share the listening socket
         if (opt.first == "listening_port" && i != 0)
         {
-          mg_set_listening_socket(
-            server.get(), mg_get_listening_socket(servers[0].get()));
+          mg613_set_listening_socket(
+            server.get(), mg613_get_listening_socket(servers[0].get()));
         }
         else
         {
           auto errormsg =
-            mg_set_option(server.get(), opt.first.c_str(), opt.second.c_str());
+            mg613_set_option(server.get(), opt.first.c_str(), opt.second.c_str());
 
           if (errormsg)
           {
@@ -138,7 +138,7 @@ public:
 private:
   static void signalHandler(int sigNum_);
   static void* serve(void* server_);
-  static int delegater(mg_connection *conn_, enum mg_event ev_);
+  static int delegater(mg613_connection *conn_, enum mg613_event ev_);
 
   static volatile int exitFlag;
   static Handler handler;

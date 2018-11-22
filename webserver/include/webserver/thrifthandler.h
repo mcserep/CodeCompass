@@ -12,7 +12,7 @@
 
 #include <util/logutil.h>
 
-#include "mongoose.h"
+#include "mongoose_613.h"
 
 /**
  * Returns the demangled name of the type described by the given type info.
@@ -57,7 +57,7 @@ protected:
     /**
      * Mongoose connection.
      */
-    struct mg_connection* connection;
+    struct mg613_connection* connection;
 
     /**
      * A pointer for the real call context (for dispatch call).
@@ -106,7 +106,7 @@ public:
     return "ThriftHandler";
   }
 
-  int beginRequest(struct mg_connection *conn_) override
+  int beginRequest(struct mg613_connection *conn_) override
   {
     using namespace ::apache::thrift;
     using namespace ::apache::thrift::transport;
@@ -139,15 +139,15 @@ public:
         << "Response:\n" << response.c_str() << std::endl;
 
       // Send HTTP reply to the client create headers
-      mg_send_header(conn_, "Content-Type", "application/x-thrift");
-      mg_send_header(
+      mg613_send_header(conn_, "Content-Type", "application/x-thrift");
+      mg613_send_header(
         conn_, "Content-Length", std::to_string(response.length()).c_str());
 
       // Terminate headers
-      mg_write(conn_, "\r\n", 2);
+      mg613_write(conn_, "\r\n", 2);
 
       // Send content
-      mg_write(conn_, response.c_str(), response.length());
+      mg613_write(conn_, response.c_str(), response.length());
     }
     catch (const std::exception& ex)
     {
@@ -160,11 +160,11 @@ public:
 
     // Returning non-zero tells mongoose that our function has replied to
     // the client, and mongoose should not send client any more data.
-    return MG_TRUE;
+    return MG613_TRUE;
   }
 
 private:
-  std::string getContent(mg_connection* conn_)
+  std::string getContent(mg613_connection* conn_)
   {
     return std::string(conn_->content, conn_->content + conn_->content_len);
   }

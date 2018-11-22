@@ -8,7 +8,7 @@ namespace cc
 namespace webserver
 {
 
-int MainRequestHandler::begin_request_handler(struct mg_connection* conn_)
+int MainRequestHandler::begin_request_handler(struct mg613_connection* conn_)
 {
   // We advance ot by one because of the '/' character.
   const std::string& uri = conn_->uri + 1;
@@ -23,34 +23,34 @@ int MainRequestHandler::begin_request_handler(struct mg_connection* conn_)
 
   if (uri.find_first_of("doxygen/") == 0)
   {
-    mg_send_file(conn_, getDocDirByURI(uri).c_str());
-    return MG_MORE;
+    mg613_send_file(conn_, getDocDirByURI(uri).c_str());
+    return MG613_MORE;
   }
 
-  // Returning MG_FALSE tells mongoose that we didn't served the request
+  // Returning MG613_FALSE tells mongoose that we didn't served the request
   // so mongoose should serve it.
-  return MG_FALSE;
+  return MG613_FALSE;
 }
 
 int MainRequestHandler::operator()(
-  struct mg_connection* conn_,
-  enum mg_event ev_)
+  struct mg613_connection* conn_,
+  enum mg613_event ev_)
 {
   int result;
 
   switch (ev_)
   {
-    case MG_REQUEST:
+    case MG613_REQUEST:
       return begin_request_handler(conn_);
 
-    case MG_AUTH:
+    case MG613_AUTH:
       if (digestPasswdFile.empty())
-        return MG_TRUE;
+        return MG613_TRUE;
 
       FILE* fp = fopen(digestPasswdFile.c_str(), "r");
       if (fp) 
       {
-        result = mg_authorize_digest(conn_, fp);
+        result = mg613_authorize_digest(conn_, fp);
         fclose(fp);
         return result;
       }
@@ -65,7 +65,7 @@ int MainRequestHandler::operator()(
       break;
   }
 
-  return MG_FALSE;
+  return MG613_FALSE;
 }
 
 std::string MainRequestHandler::getDocDirByURI(std::string uri_)
