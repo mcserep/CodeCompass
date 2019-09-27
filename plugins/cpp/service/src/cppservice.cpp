@@ -1181,6 +1181,7 @@ void CppServiceHandler::getFileDiagramTypes(
     return_["Include Dependency"]                   = INCLUDE_DEPENDENCY;
     return_["Component Users"]                      = COMPONENT_USERS;
     return_["Interface Diagram"]                    = INTERFACE;
+    return_["Interdependence"]                      = INTERDEPENDENCE;
   }
 }
 
@@ -1217,6 +1218,10 @@ void CppServiceHandler::getFileDiagram(
 
     case SUBSYSTEM_DEPENDENCY:
       diagram.getSubsystemDependencyDiagram(graph, fileId_);
+      break;
+
+    case INTERDEPENDENCE:
+      diagram.getInterdependenceDiagram(graph, fileId_);
       break;
   }
 

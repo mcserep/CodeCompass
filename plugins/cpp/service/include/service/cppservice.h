@@ -258,6 +258,9 @@ private:
       between the subdirectories of the queried module. This diagram is useful
       to understand the relationships of the subdirectories (submodules)
       of a module. */
+
+    INTERDEPENDENCE, /*!< This diagram shows the degree of interdependence between
+      software modules regarding different types of connections. */
   };
 
   static bool compareByPosition(

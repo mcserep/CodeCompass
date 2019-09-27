@@ -126,6 +126,28 @@ std::string FileDiagram::getIncludeDependencyDiagramLegend()
   return builder.getOutput();
 }
 
+void FileDiagram::getInterdependenceDiagram(
+  util::Graph& graph_,
+  const core::FileId& fileId_)
+{
+  core::FileInfo fileInfo;
+  _projectHandler.getFileInfo(fileInfo, fileId_);
+  util::Graph::Node currentNode = addNode(graph_, fileInfo);
+  decorateNode(graph_, currentNode, centerNodeDecoration);
+
+  // collect all files that have any connection to the first node
+
+}
+
+std::string FileDiagram::getInterdependenceDiagramLegend()
+{
+  util::LegendBuilder builder("Interdependence Diagram");
+
+  builder.addNode("center file", centerNodeDecoration);
+
+  return builder.getOutput();
+}
+
 void FileDiagram::getExternalDependencyDiagram(
   util::Graph& graph_,
   const core::FileId& fileId_)

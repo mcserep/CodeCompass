@@ -105,6 +105,20 @@ public:
    */
   std::string getComponentUsersDiagramLegend();
 
+  /**
+   * Interdependence diagram for source file S shows which source files have
+   * any correlation to S.
+   */
+  void getInterdependenceDiagram(
+    util::Graph& graph_,
+    const core::FileId& fileId_);
+
+  /**
+   * This function creates legend for the Interdependence diagram.
+   * @return The generated legend as a string in SVG format.
+   */
+  std::string getInterdependenceDiagramLegend();
+
 private:
   typedef std::vector<std::pair<std::string, std::string>> Decoration;
 
