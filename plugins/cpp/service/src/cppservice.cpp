@@ -1260,6 +1260,10 @@ void CppServiceHandler::getFileDiagramLegend(
       case SUBSYSTEM_DEPENDENCY:
         return_ = diagram.getSubsystemDependencyDiagramLegend();
         break;
+
+      case INTERDEPENDENCE:
+        return_ = diagram.getInterdependenceDiagramLegend();
+        break;
   }
 }
 
@@ -1543,6 +1547,41 @@ std::size_t CppServiceHandler::queryCallsCount(
   model::CppAstNode node = nodes.front();
 
   return _db->query_value<model::CppAstCount>(astCallsQuery(node)).count;
+}
+
+std::vector<AstNodeInfo> CppServiceHandler::getFunctionDefinitions(core::FileId fileId)
+{
+  std::vector<AstNodeInfo> nodes;
+
+  getFileReferences(nodes, fileId, CppServiceHandler::FUNCTIONS);
+
+  return nodes;
+}
+
+std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstNodeId& astNodeId_)
+{
+  std::map<core::FileId, int> connections;
+
+  std::vector<AstNodeInfo> nodes;
+
+  getReferences(nodes, astNodeId_, CppServiceHandler::USAGE, {});
+
+  for (const AstNodeInfo& node: nodes)
+  {
+    core::FileId id = node.range.file;
+    std::map<core::FileId, int>::iterator iter = connections.find(id);
+
+    if (iter != connections.end())
+    {
+      ++iter->second;
+    }
+    else
+    {
+      connections.emplace(std::make_pair(id, 1));
+    }
+  }
+
+  return connections;
 }
 
 } // language

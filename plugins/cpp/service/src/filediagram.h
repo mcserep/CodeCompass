@@ -381,12 +381,25 @@ private:
     const util::Graph::Node& node_,
     bool reverse_);
 
+  std::vector<util::Graph::Node> getCallees(
+    util::Graph& graph_,
+    const util::Graph::Node& node_);
+
+  std::vector<util::Graph::Node> getFunctionCalleeFiles(
+    util::Graph& graph_,
+    const util::Graph::Node& node_,
+    bool reverse = false);
+
   static const Decoration centerNodeDecoration;
   static const Decoration sourceFileNodeDecoration;
   static const Decoration headerFileNodeDecoration;
   static const Decoration binaryFileNodeDecoration;
   static const Decoration objectFileNodeDecoration;
   static const Decoration directoryNodeDecoration;
+
+  static const Decoration notUnderstandNodeDecoration;
+  static const Decoration partiallyUnderstandNodeDecoration;
+  static const Decoration fullyUnderstandNodeDecoration;
 
   static const Decoration usagesEdgeDecoration;
   static const Decoration revUsagesEdgeDecoration;

@@ -131,6 +131,12 @@ public:
     std::vector<SyntaxHighlight>& return_,
     const core::FileId& fileId_) override;
 
+  std::vector<AstNodeInfo> getFunctionDefinitions(
+    core::FileId fileId);
+
+  std::map<core::FileId, int> getFunctionCalls(
+    const core::AstNodeId& astNodeId_);
+
 private:
   enum ReferenceType
   {

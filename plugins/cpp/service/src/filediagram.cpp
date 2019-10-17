@@ -133,9 +133,13 @@ void FileDiagram::getInterdependenceDiagram(
   core::FileInfo fileInfo;
   _projectHandler.getFileInfo(fileInfo, fileId_);
   util::Graph::Node currentNode = addNode(graph_, fileInfo);
-  decorateNode(graph_, currentNode, centerNodeDecoration);
+  decorateNode(graph_, currentNode, fullyUnderstandNodeDecoration);
 
   // collect all files that have any connection to the first node
+
+  util::bfsBuild(graph_, currentNode, std::bind(&FileDiagram::getCallees,
+    this, std::placeholders::_1, std::placeholders::_2),
+    {}, usagesEdgeDecoration, 3);
 
 }
 
@@ -708,6 +712,76 @@ std::vector<core::FileId> FileDiagram::getUsedFileIds(
   return usages;
 }
 
+std::vector<util::Graph::Node> FileDiagram::getCallees(
+  util::Graph& graph_,
+  const util::Graph::Node& node_)
+{
+  return getFunctionCalleeFiles(graph_, node_);
+}
+
+std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
+  util::Graph& graph_,
+  const util::Graph::Node& node_,
+  bool reverse)
+{
+  // menj végig az összes függvényhíváson
+  // keresd meg a hozzá tartozó osztályt
+  // növeld eggyel a kapcsolatok számát a cpp fájllal
+  std::vector<util::Graph::Node> callees;
+
+  _transaction([&, this]{
+    FileResult file = _db->query<model::File>(
+      FileQuery::id == std::stoull(node_));
+
+    std::vector<AstNodeInfo> functions;
+    LOG(debug) << "file path: " << file.begin()->path;
+    core::FileId fileId = std::to_string(file.begin()->id);
+    functions = _cppHandler.getFunctionDefinitions(fileId);
+
+    std::map<core::FileId, int> functionCalls;
+    for (const AstNodeInfo& node : functions)
+    {
+      LOG(debug) << "current node: " << node.astNodeValue;
+      std::map<core::FileId, int> connections = _cppHandler.getFunctionCalls(node.id);
+      LOG(debug) << "connections size: " << connections.size();
+      for (std::pair<core::FileId, int> p : connections)
+      {
+        if (p.first != file.begin()->path)
+        {
+          std::map<core::FileId, int>::iterator iter = functionCalls.find(p.first);
+          if (iter != functionCalls.end())
+          {
+            iter->second += p.second;
+          }
+          else
+          {
+            functionCalls.emplace(p);
+          }
+        }
+      }
+    }
+
+    for (auto node : functionCalls)
+      LOG(debug) << "node first: " << node.first << "node second: " << node.second;
+
+    std::vector<core::FileId> files;
+    for (auto pair : functionCalls)
+    {
+      files.push_back(pair.first);
+    }
+
+    for (const core::FileId& fileId: files)
+    {
+      core::FileInfo fileInfo;
+      _projectHandler.getFileInfo(fileInfo, fileId);
+
+      callees.push_back(addNode(graph_, fileInfo));
+    }
+  });
+
+  return callees;
+}
+
 util::Graph::Node FileDiagram::addNode(
   util::Graph& graph_,
   const core::FileInfo& fileInfo_)
@@ -804,6 +878,24 @@ const FileDiagram::Decoration FileDiagram::objectFileNodeDecoration = {
 
 const FileDiagram::Decoration FileDiagram::directoryNodeDecoration = {
   {"shape", "folder"}
+};
+
+const FileDiagram::Decoration FileDiagram::notUnderstandNodeDecoration = {
+  {"shape", "ellipse"},
+  {"style", "filled"},
+  {"fillcolor", "white"}
+};
+
+const FileDiagram::Decoration FileDiagram::partiallyUnderstandNodeDecoration = {
+  {"shape", "ellipse"},
+  {"style", "filled"},
+  {"fillcolor", "green"}
+};
+
+const FileDiagram::Decoration FileDiagram::fullyUnderstandNodeDecoration = {
+  {"shape", "ellipse"},
+  {"style", "filled"},
+  {"fillcolor", "green"}
 };
 
 const FileDiagram::Decoration FileDiagram::usagesEdgeDecoration = {
