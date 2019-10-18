@@ -141,6 +141,10 @@ void FileDiagram::getInterdependenceDiagram(
     this, std::placeholders::_1, std::placeholders::_2),
     {}, usagesEdgeDecoration, 3);
 
+  util::bfsBuild(graph_, currentNode, std::bind(&FileDiagram::getParents,
+    this, std::placeholders::_1, std::placeholders::_2),
+    {}, dependsEdgeDecoration, 3);
+
 }
 
 std::string FileDiagram::getInterdependenceDiagramLegend()
@@ -779,6 +783,31 @@ std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
   });
 
   return callees;
+}
+
+std::vector<util::Graph::Node> FileDiagram::getParents(
+  util::Graph& graph_,
+  const util::Graph::Node& node_)
+{
+  return getParentFiles(graph_, node_);
+}
+
+std::vector<util::Graph::Node> FileDiagram::getParentFiles(
+  util::Graph& graph_,
+  const util::Graph::Node& node_)
+{
+  std::vector<core::FileId> files;
+
+  _transaction([&, this]
+   {
+     FileResult file = _db->query<model::File>(
+       FileQuery::id == std::stoull(node_));
+
+     files = _cppHandler.getParentClasses(std::to_string(file.begin()->id));
+
+   });
+
+  return files;
 }
 
 util::Graph::Node FileDiagram::addNode(

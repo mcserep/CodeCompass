@@ -1584,6 +1584,20 @@ std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstN
   return connections;
 }
 
+std::vector<core::FileId> CppServiceHandler::getParentClasses(
+  const core::FileId fileId)
+{
+  std::vector<AstNodeInfo> nodes;
+  getFileReferences(nodes, fileId, CppServiceHandler::INHERIT_FROM);
+  std::vector<core::FileId> files;
+
+  for (auto ast : nodes)
+  {
+    files.push_back(ast.range.file);
+  }
+  return files;
+}
+
 } // language
 } // service
 } // cc

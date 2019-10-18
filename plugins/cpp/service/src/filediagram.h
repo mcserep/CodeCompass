@@ -390,6 +390,14 @@ private:
     const util::Graph::Node& node_,
     bool reverse = false);
 
+  std::vector<util::Graph::Node> getParents(
+    util::Graph& graph_,
+    const util::Graph::Node& node_);
+
+  std::vector<util::Graph::Node> getParentFiles(
+    util::Graph& graph_,
+    const util::Graph::Node& node_);
+
   static const Decoration centerNodeDecoration;
   static const Decoration sourceFileNodeDecoration;
   static const Decoration headerFileNodeDecoration;
