@@ -734,16 +734,14 @@ std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
       FileQuery::id == std::stoull(node_));
 
     std::vector<AstNodeInfo> functions;
-    LOG(debug) << "file path: " << file.begin()->path;
     core::FileId fileId = std::to_string(file.begin()->id);
     functions = _cppHandler.getFunctionDefinitions(fileId);
 
     std::map<core::FileId, int> functionCalls;
     for (const AstNodeInfo& node : functions)
     {
-      LOG(debug) << "current node: " << node.astNodeValue;
       std::map<core::FileId, int> connections = _cppHandler.getFunctionCalls(node.id);
-      LOG(debug) << "connections size: " << connections.size();
+
       for (std::pair<core::FileId, int> p : connections)
       {
         if (p.first != file.begin()->path)
@@ -761,9 +759,10 @@ std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
       }
     }
 
-    for (auto node : functionCalls)
-      LOG(debug) << "node first: " << node.first << "node second: " << node.second;
-
+    for (auto pair : functionCalls)
+    {
+      LOG(debug) << "pair first: " << pair.first << ", pair second: " << pair.second;
+    }
     std::vector<core::FileId> files;
     for (auto pair : functionCalls)
     {

@@ -1564,7 +1564,7 @@ std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstN
 
   std::vector<AstNodeInfo> nodes;
 
-  getReferences(nodes, astNodeId_, CppServiceHandler::USAGE, {});
+  getReferences(nodes, astNodeId_, CppServiceHandler::CALLEE, {});
 
   for (const AstNodeInfo& node: nodes)
   {
@@ -1573,7 +1573,7 @@ std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstN
 
     if (iter != connections.end())
     {
-      ++iter->second;
+      ++(iter->second);
     }
     else
     {

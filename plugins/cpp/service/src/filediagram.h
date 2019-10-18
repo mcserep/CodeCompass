@@ -413,6 +413,8 @@ private:
   static const Decoration dependsEdgeDecoration;
   static const Decoration revDependsEdgeDecoration;
 
+  //static const Decoration interdependenceEdgeDecoration;
+
   std::shared_ptr<odb::database> _db;
   util::OdbTransaction _transaction;
   CppServiceHandler _cppHandler;
