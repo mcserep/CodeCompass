@@ -27,6 +27,9 @@
 
 #include "diagram.h"
 #include "filediagram.h"
+#include "../include/service/cppservice.h"
+#include "../../../../../../CodeCompass/service/project/gen-cpp/common_types.h"
+#include "../../../../../../CodeCompass/service/language/gen-cpp/language_types.h"
 
 namespace
 {
@@ -1549,7 +1552,8 @@ std::size_t CppServiceHandler::queryCallsCount(
   return _db->query_value<model::CppAstCount>(astCallsQuery(node)).count;
 }
 
-std::vector<AstNodeInfo> CppServiceHandler::getFunctionDefinitions(core::FileId fileId)
+std::vector<AstNodeInfo> CppServiceHandler::getFunctionDefinitions(
+  core::FileId fileId)
 {
   std::vector<AstNodeInfo> nodes;
 
@@ -1558,7 +1562,8 @@ std::vector<AstNodeInfo> CppServiceHandler::getFunctionDefinitions(core::FileId 
   return nodes;
 }
 
-std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstNodeId& astNodeId_)
+std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(
+  const core::AstNodeId& astNodeId_)
 {
   std::map<core::FileId, int> connections;
 
@@ -1584,18 +1589,64 @@ std::map<core::FileId, int> CppServiceHandler::getFunctionCalls(const core::AstN
   return connections;
 }
 
-std::vector<core::FileId> CppServiceHandler::getParentClasses(
-  const core::FileId fileId)
+std::vector<AstNodeInfo> CppServiceHandler::getClassDefinitions(
+  const core::FileId fileId_)
 {
   std::vector<AstNodeInfo> nodes;
-  getFileReferences(nodes, fileId, CppServiceHandler::INHERIT_FROM);
-  std::vector<core::FileId> files;
+  getFileReferences(nodes, fileId_, CppServiceHandler::TYPES);
+  return nodes;
+}
 
-  for (auto ast : nodes)
+std::map<core::FileId, int> CppServiceHandler::getParentClasses(
+  const core::AstNodeId& astNodeId_)
+{
+  std::map<core::FileId, int> connections;
+  std::vector<AstNodeInfo> nodes;
+
+  getReferences(nodes, astNodeId_, CppServiceHandler::INHERIT_FROM, {});
+
+  for (const AstNodeInfo& node: nodes)
   {
-    files.push_back(ast.range.file);
+    core::FileId id = node.range.file;
+    std::map<core::FileId, int>::iterator iter = connections.find(id);
+
+    if (iter != connections.end())
+    {
+      ++(iter->second);
+    }
+    else
+    {
+      connections.emplace(std::make_pair(id, 1));
+    }
   }
-  return files;
+
+  return connections;
+}
+
+std::map<core::FileId, int> CppServiceHandler::getEnumCalls(
+  const core::AstNodeId& astNodeId_)
+{
+  std::map<core::FileId, int> connections;
+
+  std::vector<AstNodeInfo> nodes;
+  //getReferences(nodes, astNodeId_, CppServiceHandler::ENUM_CONSTANTS, {});
+
+  for (auto node : nodes)
+  {
+    core::FileId id = node.range.file;
+    std::map<core::FileId, int>::iterator iter = connections.find(id);
+
+    if (iter != connections.end())
+    {
+      ++(iter->second);
+    }
+    else
+    {
+      connections.emplace(std::make_pair(id, 1));
+    }
+  }
+
+  return connections;
 }
 
 } // language

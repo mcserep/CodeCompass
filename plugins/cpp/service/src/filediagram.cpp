@@ -145,9 +145,9 @@ void FileDiagram::getInterdependenceDiagram(
 
   // collect all files that have any connection to the first node
 
-  util::bfsBuild(graph_, currentNode, std::bind(&FileDiagram::getCallees,
+ /* util::bfsBuild(graph_, currentNode, std::bind(&FileDiagram::getCallees,
     this, std::placeholders::_1, std::placeholders::_2),
-    {}, usagesEdgeDecoration, 3);
+    {}, usagesEdgeDecoration, 3);*/
 
   util::bfsBuild(graph_, currentNode, std::bind(&FileDiagram::getParents,
     this, std::placeholders::_1, std::placeholders::_2),
@@ -741,7 +741,8 @@ std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
   // növeld eggyel a kapcsolatok számát a cpp fájllal
   std::vector<util::Graph::Node> callees;
 
-  _transaction([&, this]{
+  _transaction([&, this]
+  {
     FileResult file = _db->query<model::File>(
       FileQuery::id == std::stoull(node_));
 
@@ -775,16 +776,11 @@ std::vector<util::Graph::Node> FileDiagram::getFunctionCalleeFiles(
     {
       LOG(debug) << "pair first: " << pair.first << ", pair second: " << pair.second;
     }
-    std::vector<core::FileId> files;
+
     for (auto pair : functionCalls)
     {
-      files.push_back(pair.first);
-    }
-
-    for (const core::FileId& fileId: files)
-    {
       core::FileInfo fileInfo;
-      _projectHandler.getFileInfo(fileInfo, fileId);
+      _projectHandler.getFileInfo(fileInfo, pair.first);
 
       callees.push_back(addNode(graph_, fileInfo));
     }
@@ -804,18 +800,97 @@ std::vector<util::Graph::Node> FileDiagram::getParentFiles(
   util::Graph& graph_,
   const util::Graph::Node& node_)
 {
-  std::vector<core::FileId> files;
+  std::vector<util::Graph::Node> referrals;
 
   _transaction([&, this]
    {
      FileResult file = _db->query<model::File>(
        FileQuery::id == std::stoull(node_));
 
-     files = _cppHandler.getParentClasses(std::to_string(file.begin()->id));
+     core::FileId id = std::to_string(file.begin()->id);
+     std::vector<AstNodeInfo> classes = _cppHandler.getClassDefinitions(id);
 
+     std::map<core::FileId, int> classReferences;
+     for (const AstNodeInfo& c : classes)
+     {
+       std::map<core::FileId, int> connections = _cppHandler.getParentClasses(c.id);
+
+       for (std::pair<core::FileId, int> p : connections)
+       {
+         if (p.first != file.begin()->path)
+         {
+           std::map<core::FileId, int>::iterator iter = classReferences.find(p.first);
+           if (iter != classReferences.end())
+           {
+             iter->second += p.second;
+           }
+           else
+           {
+             classReferences.emplace(p);
+           }
+         }
+       }
+     }
+
+     for (const std::pair<core::FileId, int> p : classReferences)
+     {
+       core::FileInfo fileInfo;
+       _projectHandler.getFileInfo(fileInfo, p.first);
+
+       referrals.push_back(addNode(graph_, fileInfo));
+     }
    });
 
-  return files;
+  return referrals;
+}
+
+std::vector<util::Graph::Node> FileDiagram::getEnumReferences(
+  util::Graph& graph_,
+  const util::Graph::Node& node_)
+{
+  return getEnumReferenceFiles(graph_, node_);
+}
+
+std::vector<util::Graph::Node> FileDiagram::getEnumReferenceFiles(
+  util::Graph& graph_,
+  const util::Graph::Node& node_)
+{
+  std::vector<util::Graph::Node> enums;
+
+  _transaction([&, this]
+   {
+      FileResult file = _db->query<model::File>(
+        FileQuery::id == std::stoull(node_));
+
+      std::vector<AstNodeInfo> functions;
+      core::FileId fileId = std::to_string(file.begin()->id);
+      functions = _cppHandler.getFunctionDefinitions(fileId);
+
+      std::map<core::FileId, int> enumCalls;
+       for (const AstNodeInfo& node : functions)
+       {
+         std::map<core::FileId, int> connections = _cppHandler.getFunctionCalls(node.id);
+
+         for (std::pair<core::FileId, int> p : connections)
+         {
+           if (p.first != file.begin()->path)
+           {
+             std::map<core::FileId, int>::iterator iter = enumCalls.find(p.first);
+             if (iter != enumCalls.end())
+             {
+               iter->second += p.second;
+             }
+             else
+             {
+               enumCalls.emplace(p);
+             }
+           }
+         }
+       }
+
+    });
+
+  return enums;
 }
 
 util::Graph::Node FileDiagram::addNode(

@@ -137,8 +137,14 @@ public:
   std::map<core::FileId, int> getFunctionCalls(
     const core::AstNodeId& astNodeId_);
 
-  std::vector<core::FileId> getParentClasses(
+  std::vector<AstNodeInfo> getClassDefinitions(
     const core::FileId fileId);
+
+  std::map<core::FileId, int> getParentClasses(
+    const core::AstNodeId& astNodeId_);
+
+  std::map<core::FileId, int> getEnumCalls(
+    const core::AstNodeId& astNodeId_);
 
 private:
   enum ReferenceType

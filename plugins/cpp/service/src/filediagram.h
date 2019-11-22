@@ -398,6 +398,14 @@ private:
     util::Graph& graph_,
     const util::Graph::Node& node_);
 
+  std::vector<util::Graph::Node> getEnumReferences(
+    util::Graph& graph_,
+    const util::Graph::Node& node_);
+
+  std::vector<util::Graph::Node> getEnumReferenceFiles(
+    util::Graph& graph_,
+    const util::Graph::Node& node_);
+
   static const Decoration centerNodeDecoration;
   static const Decoration sourceFileNodeDecoration;
   static const Decoration headerFileNodeDecoration;
