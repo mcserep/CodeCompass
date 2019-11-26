@@ -143,6 +143,9 @@ public:
   std::map<core::FileId, int> getParentClasses(
     const core::AstNodeId& astNodeId_);
 
+  std::vector<AstNodeInfo> getEnumDefinitions(
+    const core::FileId fileId_);
+
   std::map<core::FileId, int> getEnumCalls(
     const core::AstNodeId& astNodeId_);
 

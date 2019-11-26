@@ -1594,6 +1594,11 @@ std::vector<AstNodeInfo> CppServiceHandler::getClassDefinitions(
 {
   std::vector<AstNodeInfo> nodes;
   getFileReferences(nodes, fileId_, CppServiceHandler::TYPES);
+
+  for (auto n : nodes)
+  {
+    LOG(debug) << n.astNodeValue;
+  }
   return nodes;
 }
 
@@ -1623,13 +1628,20 @@ std::map<core::FileId, int> CppServiceHandler::getParentClasses(
   return connections;
 }
 
+std::vector<AstNodeInfo> CppServiceHandler::getEnumDefinitions(
+  const core::FileId fileId_)
+{
+  std::vector<AstNodeInfo> nodes;
+  getFileReferences(nodes, fileId_, CppServiceHandler::TYPES);
+  return nodes;
+}
+
 std::map<core::FileId, int> CppServiceHandler::getEnumCalls(
   const core::AstNodeId& astNodeId_)
 {
   std::map<core::FileId, int> connections;
-
   std::vector<AstNodeInfo> nodes;
-  //getReferences(nodes, astNodeId_, CppServiceHandler::ENUM_CONSTANTS, {});
+  // getReferences(nodes, astNodeId_, CppServiceHandler::DATA_MEMBER, {});
 
   for (auto node : nodes)
   {
