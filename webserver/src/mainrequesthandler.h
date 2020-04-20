@@ -4,6 +4,8 @@
 #include <webserver/pluginhandler.h>
 #include <webserver/requesthandler.h>
 
+#include <util/odbtransaction.h>
+
 namespace cc
 {
 namespace webserver
@@ -20,7 +22,10 @@ public:
 
 private:
   int begin_request_handler(struct mg_connection *conn_);
+  int checkAuthentication(struct mg_connection* conn_);
   std::string getDocDirByURI(std::string uri_);
+
+  std::shared_ptr<odb::database> _db;
 };
   
 } // webserver

@@ -1,6 +1,11 @@
 #include <util/util.h>
 #include <util/logutil.h>
 
+#include <model/user.h>
+
+#include <regex>
+#include <vector>
+
 #include "mainrequesthandler.h"
 
 namespace cc
@@ -32,6 +37,36 @@ int MainRequestHandler::begin_request_handler(struct mg_connection* conn_)
   return MG_FALSE;
 }
 
+int MainRequestHandler::checkAuthentication(
+  struct mg_connection* conn_)
+{
+  int result;
+  const char* cookie = mg_get_header(conn_, "Cookie");
+
+  if (cookie != NULL)
+  {
+    std::map<std::string, std::string> cookieList;
+    /*while ()
+    std::string key(strtok((char*)cookie, "=; "));
+    std::string value(strtok((char*)cookie, "=; "));
+    cookieList.insert(std::make_pair(key, value));*/
+  }
+
+  if (cookie != NULL && strcmp(cookie, "username") == 0)
+  {
+    std::string name(cookie);
+    util::OdbTransaction transaction(_db);
+    transaction([&, this]
+    {
+      //auto user = _db->query<model::User>(
+        //odb::query<model::User>::username.c_str() == cookie);
+    });
+    return MG_TRUE;
+  }
+
+  return MG_FALSE;
+}
+
 int MainRequestHandler::operator()(
   struct mg_connection* conn_,
   enum mg_event ev_)
@@ -41,7 +76,20 @@ int MainRequestHandler::operator()(
   switch (ev_)
   {
     case MG_REQUEST:
+    {
+      const char *cookie = mg_get_header(conn_, "Cookie");
+
+      if (cookie == NULL || strstr(cookie, "cica=yes") == NULL)
+      {
+        mg_printf(conn_, "HTTP/1.1 200 OK\r\n"
+                         "Set-Cookie: cica=yes;\r\n"
+                         "content-Type: text/html\r\n\r\n"
+                         "Hello!");
+        return MG_TRUE;
+      }
+
       return begin_request_handler(conn_);
+    }
 
     case MG_AUTH:
     {
