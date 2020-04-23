@@ -45,23 +45,36 @@ int MainRequestHandler::checkAuthentication(
 
   if (cookie != NULL)
   {
-    std::map<std::string, std::string> cookieList;
-    /*while ()
-    std::string key(strtok((char*)cookie, "=; "));
-    std::string value(strtok((char*)cookie, "=; "));
-    cookieList.insert(std::make_pair(key, value));*/
-  }
+    std::vector<std::string> cookiePairs;
+    char* token = strtok((char*)cookie, "; ");
+    cookiePairs.emplace_back(std::string(token));
 
-  if (cookie != NULL && strcmp(cookie, "username") == 0)
-  {
-    std::string name(cookie);
-    util::OdbTransaction transaction(_db);
-    transaction([&, this]
+    while (token != NULL)
     {
-      //auto user = _db->query<model::User>(
-        //odb::query<model::User>::username.c_str() == cookie);
-    });
-    return MG_TRUE;
+      token = strtok((char*)cookie, "; ");
+      cookiePairs.emplace_back(std::string(token));
+    }
+
+    std::map<std::string, std::string> cookieList;
+    for (const auto& pair : cookiePairs)
+    {
+      char* key = strtok((char*)pair.c_str(), "=");
+      char* value = strtok(key, "=");
+      cookieList.insert(std::make_pair(key, value));
+    }
+
+    if (cookieList.find("username") != cookieList.end())
+    {
+      util::OdbTransaction transaction(_db);
+      transaction([&, this]
+      {
+        //auto user = _db->query<model::User>(
+          //odb::query<model::User>::username.c_str() == cookie);
+      });
+
+      return MG_TRUE;
+    }
+
   }
 
   return MG_FALSE;
