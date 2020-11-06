@@ -505,18 +505,15 @@ jobs:
 
     - stage: test
       name: "Parse CodeCompass"
-      dist: bionic
+      dist: focal
       addons:
         apt:
-          <<: *apt_bionic_pgsql
-        postgresql: "10"
+          <<: *apt_focal_pgsql
+        postgresql: "12"
       env:
         - DATABASE=pgsql
       before_install:
         - *create_postgres_user
-      install:
-        - *install_odb
-        - *install_thrift
       script:
         - cd $HOME/install_pgsql/bin
         - >
@@ -528,18 +525,15 @@ jobs:
           -i $HOME/build_pgsql/compile_commands.json
           -j $(nproc)
     - name: "Parse TinyXML"
-      dist: bionic
+      dist: focal
       addons:
         apt:
-          <<: *apt_bionic_pgsql
-        postgresql: "10"
+          <<: *apt_focal_pgsql
+        postgresql: "12"
       env:
         - DATABASE=pgsql
       before_install:
         - *create_postgres_user
-      install:
-        - *install_odb
-        - *install_thrift
       script:
         - cd $HOME
         - git clone https://github.com/leethomason/tinyxml2
@@ -556,18 +550,15 @@ jobs:
           -i $HOME/build_tinyxml2/compile_commands.json
           -j $(nproc)
     - name: "Parse Xerces-C++"
-      dist: bionic
+      dist: focal
       addons:
         apt:
-          <<: *apt_bionic_pgsql
-        postgresql: "10"
+          <<: *apt_focal_pgsql
+        postgresql: "12"
       env:
         - DATABASE=pgsql
       before_install:
         - *create_postgres_user
-      install:
-        - *install_odb
-        - *install_thrift
       script:
         - cd $HOME
         - git clone https://github.com/apache/xerces-c/
