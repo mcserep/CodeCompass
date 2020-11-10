@@ -524,6 +524,7 @@ jobs:
           -i $TRAVIS_BUILD_DIR
           -i $HOME/build_pgsql/compile_commands.json
           -j $(nproc)
+          -s dummyparser
     - name: "Parse TinyXML"
       dist: focal
       addons:
@@ -549,6 +550,7 @@ jobs:
           -i $HOME/tinyxml2
           -i $HOME/build_tinyxml2/compile_commands.json
           -j $(nproc)
+          -s dummyparser
     - name: "Parse Xerces-C++"
       dist: focal
       addons:
@@ -574,6 +576,7 @@ jobs:
           -i $HOME/xerces-c
           -i $HOME/build_xerces-c/compile_commands.json
           -j $(nproc)
+          -s dummyparser
 
     - stage: deploy
       name: "DockerHub deployment"
