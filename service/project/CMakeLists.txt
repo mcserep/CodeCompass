@@ -20,8 +20,9 @@ add_custom_command(
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-java
     ${CMAKE_CURRENT_BINARY_DIR}/gen-js
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-py
   COMMAND
-    ${THRIFT_EXECUTABLE} --gen cpp --gen js --gen java
+    ${THRIFT_EXECUTABLE} --gen cpp --gen js --gen java --gen py
       -o ${CMAKE_CURRENT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}/common.thrift
   DEPENDS
@@ -39,7 +40,7 @@ add_custom_command(
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/ProjectService.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/ProjectService.h
   COMMAND
-    ${THRIFT_EXECUTABLE} --gen cpp --gen js --gen java
+    ${THRIFT_EXECUTABLE} --gen cpp --gen js --gen java --gen py
       -o ${CMAKE_CURRENT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}/project.thrift
   DEPENDS
