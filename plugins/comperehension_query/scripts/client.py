@@ -1,18 +1,20 @@
+import glob
 import sys
 
 sys.path.append('gen-py')
+sys.path.append('/home/efekane/codecompass/mate_build/service/project/gen-py')
 
 from thrift import Thrift
 from thrift.transport import THttpClient
 from thrift.protocol import TJSONProtocol
 
-from comprehensionquery import ComprehensionQueryService
+from project import ProjectService
 
 # --- Server information ---#
 
 host = 'localhost'
 port = 6252
-workspace = 'proba'
+workspace = 'libgit2'
 
 
 # --- Create client objects ---#
@@ -29,13 +31,15 @@ to the API."""
     return service.Client(protocol)
 
 
-comprehensionqueryservice = create_client(ComprehensionQueryService, 'ComprehensionQueryService')
+projectservice = create_client(ProjectService, 'ProjectService')
 
 
 # --- Do the job ---#
 
 def main():
-    print(comprehensionqueryservice.getComprehensionQueryString())
+    #print(comprehensionqueryservice.getComprehensionQueryString())
+    print('csirip')
+    print(projectservice.getFileTypes())
 
 
 if __name__ == "__main__":
