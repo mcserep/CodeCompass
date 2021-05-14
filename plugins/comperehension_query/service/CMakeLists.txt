@@ -1,11 +1,21 @@
 include_directories(
   include
+  ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp
   ${PROJECT_SOURCE_DIR}/util/include
   ${PROJECT_SOURCE_DIR}/webserver/include)
 
 include_directories(SYSTEM
   ${THRIFT_LIBTHRIFT_INCLUDE_DIRS})
+
+flex_target(querylexer src/querylexer.lex ${CMAKE_CURRENT_BINARY_DIR}/querylexer.yy.cc)
+bison_target(queryparser src/querysyntaxanalyzer.y ${CMAKE_CURRENT_BINARY_DIR}/queryparser.cc)
+add_flex_bison_dependency(querylexer queryparser)
+
+add_executable(querylang
+        ${BISON_queryparser_OUTPUTS}
+        ${FLEX_querylexer_OUTPUTS}
+        )
 
 add_custom_command(
   OUTPUT
