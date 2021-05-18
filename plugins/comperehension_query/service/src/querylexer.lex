@@ -1,7 +1,10 @@
 %option noyywrap c++ yylineno
 
 %{
+#include <iostream>
 #include "Parser.h"
+
+using namespace std;
 %}
 
 LETTER          [a-zA-Z]
@@ -10,7 +13,7 @@ WHITESPACE      [ \t\n]
 
 %%
 "which"						{ printf("which"); return Parser::WHICH; }
-"file"						{ return Parser::FILE; }
+"file"						{ return Parser::SOURCEFILE; }
 "commit"					{ return Parser::COMMIT; }
 "dev"						{ return Parser::DEV; }
 "team"						{ return Parser::TEAM; }

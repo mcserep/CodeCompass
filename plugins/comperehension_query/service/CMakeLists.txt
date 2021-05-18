@@ -1,3 +1,4 @@
+set(CMAKE_VERBOSE_MAKEFILE on)
 include_directories(
   include
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -8,14 +9,58 @@ include_directories(
 include_directories(SYSTEM
   ${THRIFT_LIBTHRIFT_INCLUDE_DIRS})
 
+#============================================================
+# ADD_FLEX_BISON_DEPENDENCY (public macro)
+#============================================================
+#
+macro(ADD_FLEX_BISONCPP_DEPENDENCY FlexTarget BisonTarget)
+
+    if(NOT FLEX_${FlexTarget}_OUTPUTS)
+        message(SEND_ERROR "Flex target `${FlexTarget}' does not exist.")
+    endif()
+
+    if(NOT BISONCPP_${BisonTarget}_OUTPUT_HEADER)
+        message(SEND_ERROR "Bisoncpp target `${BisonTarget}' does not exist.")
+    endif()
+
+    set_source_files_properties(${FLEX_${FlexTarget}_OUTPUTS}
+            PROPERTIES OBJECT_DEPENDS ${BISONCPP_${BisonTarget}_OUTPUT_HEADER})
+endmacro()
+
+bisoncpp_target(queryparser src/queryparser.y ${CMAKE_CURRENT_BINARY_DIR}/parse.cc)
+add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih
+        COMMAND
+            "sed "
+)
+#execute_process(COMMAND "${BISONCPP_EXECUTABLE} src/queryparser.y"
+#        COMMAND_ECHO STDOUT)
+#add_custom_command(
+#        OUTPUT
+#            ${CMAKE_CURRENT_BINARY_DIR}/Parserbase.h
+#            ${CMAKE_CURRENT_BINARY_DIR}/Parser.h
+#            ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih
+#            ${CMAKE_CURRENT_BINARY_DIR}/parser.cc
+#        COMMAND
+#            ${BISONCPP_EXECUTABLE}
+#        ARGS
+#            src/queryparser.y
+#        COMMENT
+#            "Building bison stuff"
+#)
+
+#add_custom_target(run ALL
+#        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Parserbase.h)
+
 flex_target(querylexer src/querylexer.lex ${CMAKE_CURRENT_BINARY_DIR}/querylexer.yy.cc)
-bison_target(queryparser src/querysyntaxanalyzer.y ${CMAKE_CURRENT_BINARY_DIR}/queryparser.cc)
-add_flex_bison_dependency(querylexer queryparser)
+add_flex_bisoncpp_dependency(querylexer queryparser)
 
 add_executable(querylang
-        ${BISON_queryparser_OUTPUTS}
-        ${FLEX_querylexer_OUTPUTS}
-        )
+         src/main.cc
+         ${BISONCPP_queryparser_OUTPUTS}
+         ${FLEX_querylexer_OUTPUTS}
+         )
 
 add_custom_command(
   OUTPUT

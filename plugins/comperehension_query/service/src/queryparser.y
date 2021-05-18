@@ -1,11 +1,12 @@
 %baseclass-preinclude <iostream>
+// csirip
 
-%token IDENTIFIER SEMICOLON COMMA WHICH FILE TEAM DEV COMMIT
+%token IDENTIFIER SEMICOLON COMMA WHICH SOURCEFILE TEAM DEV COMMIT
 
 %%
 
 start:
-	WHICH returnList SEMICOLON { std::cout << "Processing symbols." << std::endl; }
+	WHICH returnList SEMICOLON { std::cout << ("Processing symbols.") << std::endl; }
 ;
 
 returnList:
@@ -19,9 +20,9 @@ returnList:
 ;
 
 fileUnit:
-	FILE
+	SOURCEFILE
 |
-	FILE COMMA returnList
+	SOURCEFILE COMMA returnList
 ;
 
 devUnit:
