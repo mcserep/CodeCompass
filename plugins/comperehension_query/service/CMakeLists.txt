@@ -28,12 +28,13 @@ macro(ADD_FLEX_BISONCPP_DEPENDENCY FlexTarget BisonTarget)
 endmacro()
 
 bisoncpp_target(queryparser src/queryparser.y ${CMAKE_CURRENT_BINARY_DIR}/parse.cc)
-add_custom_command(
-        OUTPUT
-            ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih
-        COMMAND
-            "sed "
-)
+#execute_process(
+#        OUTPUT
+#            ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih
+#        COMMAND
+#            "sed "
+#)
+
 #execute_process(COMMAND "${BISONCPP_EXECUTABLE} src/queryparser.y"
 #        COMMAND_ECHO STDOUT)
 #add_custom_command(
@@ -61,6 +62,12 @@ add_executable(querylang
          ${BISONCPP_queryparser_OUTPUTS}
          ${FLEX_querylexer_OUTPUTS}
          )
+
+set(STRING_MATCH "d_scanner.lex()")
+file(READ ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih FILE_CONTENT)
+string(REPLACE ${STRING_MATCH} "1" STRING_MATCHING ${FILE_CONTENT})
+message("file content: " ${FILE_CONTENT})
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Parser.ih ${FILE_CONTENT})
 
 add_custom_command(
   OUTPUT
