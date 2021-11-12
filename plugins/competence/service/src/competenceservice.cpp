@@ -92,6 +92,13 @@ void CompetenceServiceHandler::setCompetenceRatio(
   });
 }
 
+void CompetenceServiceHandler::getDiagramTypes(
+  std::map<std::string, std::int32_t>& return_,
+  const core::FileId& fileId_)
+{
+  //return_["User view"] =
+}
+
 void CompetenceServiceHandler::getDiagram(
   std::string& return_,
   const core::FileId& fileId_,

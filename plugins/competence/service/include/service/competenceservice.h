@@ -24,11 +24,28 @@ class CompetenceServiceHandler : virtual public CompetenceServiceIf
 {
   friend class CompetenceDiagram;
 
+private:
+  enum DiagramType
+  {
+    USER_VIEW,
+    TEAM_VIEW,
+    TEAM_VIEW_DIRECTORY,
+    INDIVIDUAL_COMPANY_VIEW,
+    ACCUMULATED_COMPANY_VIEW,
+    RISK_VIEW,
+    NUMBER_OF_MODIFICATIONS
+    
+  };
+
 public:
   CompetenceServiceHandler(
     std::shared_ptr<odb::database> db_,
     std::shared_ptr<std::string> datadir_,
     const cc::webserver::ServerContext& context_);
+
+  void getDiagramTypes(
+    std::map<std::string, std::int32_t>& return_,
+    const core::FileId& fileId_);
 
   void setCompetenceRatio(
     std::string& return_,

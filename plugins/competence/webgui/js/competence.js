@@ -28,6 +28,7 @@ function (topic, Menu, MenuItem, PopupMenuItem, Tooltip, model, viewHandler) {
     },
 
     getDiagramLegend : function (diagramType) {
+      console.log(diagramType);
       return model.competenceservice.getDiagramLegend(diagramType);
     },
 
