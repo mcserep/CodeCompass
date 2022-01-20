@@ -7,6 +7,7 @@
 #include <memory>
 #include <cctype>
 #include <functional>
+#include <libgen.h>
 
 #include <model/commitdata.h>
 #include <model/commitdata-odb.hxx>
@@ -228,7 +229,12 @@ int ExpertiseCalculation::walkCb(const char* root,
 
 std::string ExpertiseCalculation::plagiarismCommand(const std::string& extension)
 {
-  std::string command("java -jar ../lib/java/jplag-2.12.1.jar -t 1 -vq -l ");
+  // Disgusting C magic to find jar file.
+  char buf [1024];
+  readlink("/proc/self/exe", buf, 1024);
+  std::string baseDir(dirname(dirname(buf)));
+
+  std::string command("java -jar " + baseDir + "/lib/java/jplag-2.12.1.jar -t 1 -vq -l ");
 
   std::vector<std::string> cppExt = { ".cpp", ".CPP", ".cxx", ".CXX", ".c++", ".C++",
                                       ".c", ".C", ".cc", ".CC", ".h", ".H",
