@@ -7,7 +7,8 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <signal.h>
+#include <csignal>
+#include <stdexcept>
 
 #include <webserver/mongoose.h>
 

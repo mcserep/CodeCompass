@@ -1,0 +1,67 @@
+name: Run linter on source code
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  clang-tidy-cpp:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update apt-get
+        run: sudo apt-get update
+
+      - name: Install required packages Ubuntu 20
+        run: >
+          sudo apt-get install -y git cmake make g++ libboost-all-dev llvm-10-dev clang-10
+          libclang-10-dev odb libodb-dev thrift-compiler libthrift-dev default-jdk libssl-dev
+          libgraphviz-dev libmagic-dev libgit2-dev ctags doxygen libgtest-dev npm libldap2-dev
+          clang-tidy
+
+      - name: Install Postgresql Ubuntu 20
+        run: sudo apt-get install libodb-pgsql-dev postgresql-server-dev-12
+
+      - name: Install GoogleTest
+        run: |
+          echo $PATH
+          cd $HOME
+          mkdir gtest
+          cp -R /usr/src/googletest/* ./gtest
+          
+          cd gtest
+          mkdir build
+          cd build
+          
+          cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/gtest-install
+          make install -j $(nproc)
+          echo "GTEST_ROOT=$HOME/gtest-install" >> $GITHUB_ENV
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Run CMake (Postgresql)
+        working-directory: ${{github.workspace}}/build
+        run: >
+          cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+          -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+          -DDATABASE=pgsql
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          -DLLVM_DIR=/usr/lib/llvm-10/cmake
+          -DClang_DIR=/usr/lib/cmake/clang-10
+          -DTEST_DB="pgsql:host=localhost;username=postgres;password=postgres;port=5432;database=cc_test"
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+        run: make -j $(nproc)
+
+      - name: Run Clang-Tidy on source
+        working-directory: ${{github.workspace}}/build
+        run: >
+          run-clang-tidy 
+          -extra-arg=-Wno-unknown-warning-option 
+          -checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*
