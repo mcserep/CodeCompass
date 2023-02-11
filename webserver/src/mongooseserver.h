@@ -62,6 +62,8 @@ class MongooseServer
 public:
   using HTTPServiceRequestHandlerType = std::function<void(HTTPRequest&&)>;
 
+  static std::string gaTrackingIdPath;
+
   /**
    * Constructs a Mongoose listener server on the given port, and serving the
    * given directory for static resources.

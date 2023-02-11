@@ -83,7 +83,7 @@ inline cc::service::git::GitObjectType::type convertToThriftType(
       return cc::service::git::GitObjectType::Reserved1;
   }
 }
-#elif LIGBIT2_VER_MAJOR == 0 && LIBGIT2_VER_MINOR < 27
+#elif LIGBIT2_VER_MAJOR == 0 && LIBGIT2_VER_MINOR < 28
 // Older versions are supplied by Ubuntu 18 and 16.
 inline cc::service::git::GitObjectType::type convertToThriftType(
   ::git_otype gitType)
@@ -130,6 +130,13 @@ GitServiceHandler::GitServiceHandler(
 std::string GitServiceHandler::getRepoPath(const std::string& repoId_) const
 {
   return *_datadir + "/version/" + repoId_;
+}
+
+bool GitServiceHandler::isRepositoryAvailable()
+{
+  namespace fs = ::boost::filesystem;
+  return fs::exists(*_datadir + "/version") &&
+    !fs::is_empty(*_datadir + "/version");
 }
 
 void GitServiceHandler::getRepositoryList(std::vector<GitRepository>& return_)
@@ -201,6 +208,10 @@ void GitServiceHandler::getRepositoryByProjectPath(
 
   std::vector<GitRepository> repositories;
   getRepositoryList(repositories);
+  
+  std::sort(repositories.begin(), repositories.end(),
+    [](const GitRepository& repo1, const GitRepository& repo2)
+    { return repo1.path.size() > repo2.path.size();});
 
   for (const GitRepository& repo : repositories)
   {
@@ -521,12 +532,20 @@ void GitServiceHandler::getReferenceTopObject(
     return;
 
   git_oid oid;
-  int error = git_reference_name_to_id(&oid, repo.get(), branchName_.c_str());
 
-  if (error)
-    LOG(error) << "Lookup a reference by name failed: " << error;
+  int error = git_oid_fromstr(&oid, branchName_.c_str());
 
-  return_.oid = gitOidToString(&oid);
+  if (error) {
+    int error2 = git_reference_name_to_id(&oid, repo.get(), branchName_.c_str());
+
+    if (error2)
+      LOG(error) << "Lookup a reference by both hash and name failed: "
+                 << error2;
+
+    return_.oid = gitOidToString(&oid);
+  } else {
+    return_.oid = branchName_.c_str();
+  }
 
   ObjectPtr object = createObject(repo.get(), oid);
 

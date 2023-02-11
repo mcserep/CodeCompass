@@ -99,23 +99,6 @@ function(install_webplugin _dir)
   set_property(GLOBAL APPEND PROPERTY USERGUIDES "${_userguides}")
 endfunction(install_webplugin)
 
-# Finds the absolute paths for the given Boost libraries
-# Use variable arguments for the Boost libraries to link
-function(find_boost_libraries)
-  foreach(_lib ${ARGV})
-    foreach(_path ${Boost_LIBRARIES})
-      if(_path MATCHES ".*boost_${_lib}\.so$")
-        list(APPEND LIBS ${_path})
-      elseif(_path MATCHES "Boost::${_lib}$")
-        # There is no path for the lib, included as a module.
-        list(APPEND LIBS ${_path})
-      endif()
-    endforeach(_path)
-  endforeach(_lib)
-
-  set(Boost_LINK_LIBRARIES ${LIBS} PARENT_SCOPE)
-endfunction(find_boost_libraries)
-
 # Prints a coloured, and optionally bold message to the console.
 # _colour should be some ANSI colour name, like "blue" or "magenta".
 function(fancy_message _str _colour _isBold)
@@ -134,3 +117,11 @@ function(fancy_message _str _colour _isBold)
     ${CMAKE_COMMAND} -E env CLICOLOR_FORCE=1
     ${CMAKE_COMMAND} -E cmake_echo_color ${COLOUR_TAG} ${BOLD_TAG} ${_str})
 endfunction(fancy_message)
+
+# Joins a list of elements with a given glue string.
+# See: https://stackoverflow.com/questions/7172670/best-shortest-way-to-join-a-list-in-cmake
+function(join _values _glue _output)
+  string (REGEX REPLACE "([^\\]|^);" "\\1${_glue}" _tmpStr "${_values}")
+  string (REGEX REPLACE "[\\](.)" "\\1" _tmpStr "${_tmpStr}") #fixes escaping
+  set (${_output} "${_tmpStr}" PARENT_SCOPE)
+endfunction(join)

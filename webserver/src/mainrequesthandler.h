@@ -16,7 +16,7 @@ namespace webserver
 class Session;
 class SessionManager;
 
-struct MainRequestHandler
+class MainRequestHandler
 {
 public:
   SessionManager* sessionManager;

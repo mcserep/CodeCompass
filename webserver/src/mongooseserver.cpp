@@ -58,6 +58,7 @@ MongooseContext::~MongooseContext() noexcept
 } // namespace _detail
 
 volatile int MongooseServer::exitCode = 0;
+std::string MongooseServer::gaTrackingIdPath = std::string();
 
 void MongooseServer::signalHandler(int signal_)
 {
@@ -156,6 +157,19 @@ void MongooseServer::nativeRequestHandler(struct mg_connection* conn_,
 
     if (!isServiceCall)
     {
+      if (handlerRequest.uri == "/ga.txt")
+      {
+        if (!gaTrackingIdPath.empty())
+        {
+          mg_http_serve_file(conn_, nativeRequest, gaTrackingIdPath.c_str(), mg_mk_str("text/plain"), mg_mk_str(""));
+        }
+        else
+        {
+          mg_http_send_error(conn_, 404, nullptr);
+        }
+        return;
+      }
+
       // Plain old HTTP request to just download a file resource from the
       // "www-data", handle it as such.
       struct mg_serve_http_opts httpOpts;
