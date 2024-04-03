@@ -45,7 +45,7 @@ private:
 
   std::string _currentWorkingDirectory;
 
-  llvm::ErrorOr<std::string> toCanonical(const llvm::Twine& relPath_) const;
+  llvm::ErrorOr<llvm::StringRef> toCanonical(const llvm::Twine& relPath_) const;
 
   std::string toCanonicalOrSame(const llvm::Twine& relPath_) const;
 };

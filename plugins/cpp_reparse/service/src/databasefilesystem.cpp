@@ -248,14 +248,14 @@ ErrorOr<std::string> DatabaseFileSystem::getCurrentWorkingDirectory() const
 std::error_code
 DatabaseFileSystem::setCurrentWorkingDirectory(const Twine& path_)
 {
-  llvm::ErrorOr<std::string> newWorkDir = toCanonical(path_);
+  llvm::ErrorOr<llvm::StringRef> newWorkDir = toCanonical(path_);
   if (!newWorkDir.getError())
-    _currentWorkingDirectory = *newWorkDir;
+    _currentWorkingDirectory = newWorkDir->str();
 
   return newWorkDir.getError();
 }
 
-llvm::ErrorOr<std::string>
+llvm::ErrorOr<llvm::StringRef>
 DatabaseFileSystem::toCanonical(const llvm::Twine& relPath_) const
 {
   llvm::SmallString<128> absPath, canonicalPath;
@@ -277,7 +277,7 @@ DatabaseFileSystem::toCanonicalOrSame(const llvm::Twine& relPath_) const
   if (canonical.getError())
     return relPath_.str();
   else
-    return *canonical;
+    return canonical->str();
 }
 
 } // namespace reparse
