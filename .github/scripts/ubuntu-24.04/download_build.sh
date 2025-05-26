@@ -8,13 +8,6 @@ mkdir -p "${DOWNLOAD_PATH}"
 
 wget -O ${DOWNLOAD_PATH}/thrift-0.16.0.tar.gz "http://archive.apache.org/dist/thrift/0.16.0/thrift-0.16.0.tar.gz"
 
-## ODB
-
-wget -O "${DOWNLOAD_PATH}/install_latest_build2.sh" "https://github.com/Ericsson/CodeCompass/raw/master/scripts/install_latest_build2.sh"
-build2_version=$(sh "${DOWNLOAD_PATH}/install_latest_build2.sh" --version)
-odb_signature=$(wget -qO- https://pkg.cppget.org/1/beta/signature.manifest)
-odb_hash=$(echo -n "${build2_version}${odb_signature}" | md5sum | awk '{print $1}')
-
 # Calculate hash of dependencies for Github Cache Action
 
 dependencies_to_hash=("thrift-0.16.0.tar.gz")
@@ -24,7 +17,6 @@ for file in "${dependencies_to_hash[@]}"; do
     file_hash=$(md5sum "${DOWNLOAD_PATH}/${file}" | awk '{print $1}')
     concatenated_hashes="${concatenated_hashes}${file_hash}"
 done
-concatenated_hashes="${concatenated_hashes}${odb_hash}"
 
 hash_value=$(echo -n "${concatenated_hashes}" | md5sum | awk '{print $1}')
 
