@@ -17,13 +17,13 @@ jobs:
     strategy:
       matrix:
         db: [postgresql, sqlite3]
-        os: [ubuntu-22.04]
+        os: [ubuntu-22.04, ubuntu-24.04]
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
     outputs:
-      ubuntu-20-04-compile-hash-key: ${{ steps.download-compile-dependencies.outputs.compile-hash-key }}
-      ubuntu-22-04-compile-hash-key: ${{ steps.download-compile-dependencies.outputs.compile-hash-key }} # update this to 24.04 later
+      ubuntu-24-04-compile-hash-key: ${{ steps.download-compile-dependencies.outputs.compile-hash-key }}
+      ubuntu-22-04-compile-hash-key: ${{ steps.download-compile-dependencies.outputs.compile-hash-key }}
 
     services:
       # Label used to access the service container
@@ -182,7 +182,7 @@ jobs:
     strategy:
       matrix:
         db: [postgresql, sqlite3]
-        os: [ubuntu-22.04]
+        os: [ubuntu-22.04, ubuntu-24.04]
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -237,7 +237,7 @@ jobs:
           fail-on-cache-miss: true
           key: ${{ matrix.os }}-compile-install-${{ needs.build.outputs.ubuntu-22-04-compile-hash-key }}
           restore-keys: |
-            ${{ matrix.os }}-compile-install-${{ needs.build.outputs.ubuntu-20-04-compile-hash-key }}
+            ${{ matrix.os }}-compile-install-${{ needs.build.outputs.ubuntu-24-04-compile-hash-key }}
             ${{ matrix.os }}-compile-install-${{ needs.build.outputs.ubuntu-22-04-compile-hash-key }}
 
       - name: Download CodeCompass binaries
