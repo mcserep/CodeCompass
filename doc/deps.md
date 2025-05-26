@@ -1,10 +1,9 @@
 # Build Environment
 We build CodeCompass in a Linux environment. Currently, Ubuntu Long-Term
-Support releases are the main targets: Ubuntu 22.04 LTS (and Ubuntu 24.04 LTS 
-is planned).
+Support releases are the main targets: Ubuntu 22.04 LTS and Ubuntu 24.04 LTS.
 
 We also provide a Docker image that can be used as developer environment to
-CodeCompass. See its usage [in a seperate document](/docker/README.md).
+CodeCompass. See its usage [in a separate document](/docker/README.md).
 
 # Dependencies
 The following third-party tools are needed for building CodeCompass. These can
@@ -61,14 +60,19 @@ sudo apt install git cmake make g++ libboost-all-dev \
   libldap2-dev libgtest-dev
 ```
 
+#### Ubuntu 24.04 ("Noble Numbat") LTS
+
+```bash
+sudo apt install git cmake make g++ libboost-all-dev \
+  llvm-15-dev clang-15 libclang-15-dev \
+  gcc-13-plugin-dev\
+  default-jdk libssl-dev libgraphviz-dev libmagic-dev libgit2-dev exuberant-ctags doxygen \
+  libldap2-dev libgtest-dev
+```
+
 #### Database engine support
 
-Depending on the desired database engines to be supported, the following
-packages should be installed.
-
-##### Ubuntu 22.04 ("Jammy Jellyfish") LTS
-
-The database connector library must be compiled manually for this release,
+While the database connector library must be compiled manually,
 however, the database programs themselves should be installed from the
 package manager.
 
@@ -77,7 +81,8 @@ package manager.
 sudo apt install libsqlite3-dev
 
 # For PostgreSQL database systems:
-sudo apt install postgresql-server-dev-14
+sudo apt install postgresql-server-dev-14 # for Ubuntu 22.04
+sudo apt install postgresql-server-dev-16 # for Ubuntu 24.04
 ```
 
 ## Known issues
@@ -91,11 +96,11 @@ by other processes which could, in extreme cases, make the system very hard or
 impossible to recover. **Please do NOT add a `sudo` in front of any `make` or
 other commands below, unless *explicitly* specified!**
 
-### ODB (for Ubuntu 22.04)
+### ODB
 ODB is an Object Relational Mapping tool, that is required by CodeCompass.
-For Ubuntu 22.04, the official release of ODB conflicts with the official
-compiler (GNU G++ 11) of the distribution. A newer version of ODB must be
-compiled manually.
+Both for Ubuntu 22.04 and 24.04, the official release of ODB conflicts with the 
+official compiler (GNU G++ 11/13) of the distribution. A newer version of ODB 
+must be compiled manually.
 
 The ODB installation uses the build2 build system. (Build2 is not needed for
 CodeCompass so you may delete it right after the installation of ODB.)
@@ -137,6 +142,46 @@ time (depending on the machine one is using).
 
 > **Note:** now you may delete the *Build2* toolchain installed in the
 > `<build2_install_dir>` folder, if you do not need any longer.
+
+### Thrift (for Ubuntu 24.04)
+CodeCompass needs [Thrift](https://thrift.apache.org/) which provides Remote
+Procedure Call (RPC) between the server and the client. A suitable version of
+Thrift is, unfortunately, not part of the official Ubuntu repositories for
+this version (only a newer version is available), so you should download and 
+build from source.
+
+Thrift can generate stubs for many programming languages. The configure
+script looks at the development environment and if it finds the environment
+for a given language then it'll use it. For example in the previous step npm
+was installed which requires NodeJS. If NodeJS can be found on your machine
+then the corresponding stub will also compile. If you don't need it then you
+can turn it off: `./configure --without-nodejs`.
+
+In certain cases, installation may fail if development libraries for
+languages are not installed on the target machine. E.g. if Python is
+installed but the Python development headers are not, Thrift will unable to
+install. Python, PHP and such other Thrift builds are NOT required by
+CodeCompass, and can significantly increase compile time so it is advised to
+avoid using them if it's not necessary.
+
+```bash
+# Download and uncompress Thrift:
+wget "http://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=thrift/0.16.0/thrift-0.16.0.tar.gz" \
+  -O thrift-0.16.0.tar.gz
+tar -xvf ./thrift-0.16.0.tar.gz
+cd thrift-0.16.0
+
+./configure --prefix=<thrift_install_dir> --silent --without-python \
+  --enable-libtool-lock --enable-tutorial=no --enable-tests=no      \
+  --with-libevent --with-zlib --without-nodejs --without-lua        \
+  --without-ruby --without-csharp --without-erlang --without-perl   \
+  --without-php --without-php_extension --without-dart              \
+  --without-haskell --without-go --without-rs --without-haxe        \
+  --without-dotnetcore --without-d --without-qt4 --without-qt5      \
+  --without-java --without-swift
+
+make install -j $(nproc)
+```
 
 ### Node.js and NPM
 Make sure you are using at least version 18.17 of [Node.js](https://nodejs.org/en/).
