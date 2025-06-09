@@ -6,7 +6,8 @@ mkdir -p ${INSTALL_PATH}
 
 ## Compile Thrift
 
-tar -xvf ${DOWNLOAD_PATH}/thrift-0.16.0.tar.gz
+cd ${DOWNLOAD_PATH}
+tar -xvf thrift-0.16.0.tar.gz
 cd thrift-0.16.0
 ./configure --prefix=${INSTALL_PATH}/thrift --silent --without-python \
   --enable-libtool-lock --enable-tutorial=no --enable-tests=no      \
