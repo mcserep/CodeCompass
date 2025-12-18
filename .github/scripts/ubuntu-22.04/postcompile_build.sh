@@ -6,6 +6,14 @@ echo "${INSTALL_PATH}/odb/bin" >> $GITHUB_PATH
 echo "CMAKE_PREFIX_PATH=${INSTALL_PATH}/odb:$CMAKE_PREFIX_PATH" >> $GITHUB_ENV
 
 # Clean up dependency sources and intermediate binaries to save space
+echo "before"
+ls -lA ${DOWNLOAD_PATH}
+ls -lA ${INSTALL_PATH}
+ls -lA ./
 rm -rf ${DOWNLOAD_PATH}/odb
 rm -rf ${INSTALL_PATH}/build2
 rm -rf ./build2-toolchain-*
+echo "after"
+ls -lA ${DOWNLOAD_PATH}
+ls -lA ${INSTALL_PATH}
+ls -lA ./
